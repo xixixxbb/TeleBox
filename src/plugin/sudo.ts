@@ -260,21 +260,14 @@ class sudoPlugin extends Plugin {
       if (cids.length > 0 && !cids.includes(cid)) return;
       const cmd = getCommandFromMessage(msg, envPrefixes);
       if (!cmd) return;
-      // await dealCommandPluginWithMessage({ cmd, msg });
-      const sudoMsg = await msg.client?.sendMessage(msg.peerId, {
-        message: msg.message,
-        replyTo:
-          (msg.replyTo?.forumTopic ? msg.replyTo?.replyToTopId : undefined) ||
-          msg.replyToMsgId,
-        formattingEntities: msg.entities,
+      // 取消跟读：直接在 sudo 用户的原消息上执行，
+      // 输出改道由 plugins/noedit.ts 负责（别人消息的 edit 一律发新消息）
+      await dealCommandPluginWithMessage({
+        cmd,
+        msg,
+        trigger: msg,
+        isEdited: false,
       });
-      if (sudoMsg)
-        await dealCommandPluginWithMessage({
-          cmd,
-          msg: sudoMsg,
-          trigger: msg,
-          isEdited: false,
-        });
     };
 }
 const plugin = new sudoPlugin();
